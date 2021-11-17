@@ -1,0 +1,188 @@
+[
+    {
+        "id": "8a279623.06d168",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "3c650c72.46f314",
+        "type": "azureiotdevice",
+        "z": "8a279623.06d168",
+        "deviceid": "icr",
+        "pnpModelid": "",
+        "connectiontype": "constr",
+        "authenticationmethod": "sas",
+        "iothub": "HOST_NAME.azure-devices.net",
+        "isIotcentral": false,
+        "scopeid": "",
+        "enrollmenttype": "group",
+        "saskey": "SAS_KEY_SECRET",
+        "certname": "",
+        "keyname": "",
+        "protocol": "mqtt",
+        "retryInterval": "5",
+        "methods": [
+            {
+                "name": "turnOnLed"
+            },
+            {
+                "name": "blink"
+            },
+            {
+                "name": "turnOffLed"
+            },
+            {
+                "name": "echo"
+            },
+            {
+                "name": "countdown"
+            }
+        ],
+        "DPSpayload": "",
+        "gatewayHostname": "",
+        "caname": "",
+        "cert": "",
+        "key": "",
+        "ca": "",
+        "x": 620,
+        "y": 240,
+        "wires": [
+            [
+                "152e3d20.3c97d3",
+                "647e8204.9689bc"
+            ]
+        ]
+    },
+    {
+        "id": "152e3d20.3c97d3",
+        "type": "debug",
+        "z": "8a279623.06d168",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 890,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "8764f585.5784f8",
+        "type": "function",
+        "z": "8a279623.06d168",
+        "name": "telemetry",
+        "func": "msg = {\n    'topic': 'telemetry',\n    'payload': {\n        'switch1': msg.payload[0],\n        'switch2': msg.payload[1],\n        'humidity': Math.round(10000*Math.random())/100,\n        'temperature': 20 + (Math.round(2500*Math.random())/100),\n        'pressure': 850 + (Math.round(35000*Math.random())/100)\n    }\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 380,
+        "y": 160,
+        "wires": [
+            [
+                "3c650c72.46f314",
+                "820d934f.996a8"
+            ]
+        ]
+    },
+    {
+        "id": "fddc2c55.3c7d1",
+        "type": "inject",
+        "z": "8a279623.06d168",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 200,
+        "y": 240,
+        "wires": [
+            [
+                "97da55db.2d8878"
+            ]
+        ]
+    },
+    {
+        "id": "97da55db.2d8878",
+        "type": "function",
+        "z": "8a279623.06d168",
+        "name": "properties",
+        "func": "msg = {\n    'topic': 'property',\n    'payload': { 'fanSpeed': {'value':120},\n        'voltage': {'value':5},\n        'current': {'value':55},\n        'irSwitch': {'value':true}\n    }\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 380,
+        "y": 240,
+        "wires": [
+            [
+                "3c650c72.46f314"
+            ]
+        ]
+    },
+    {
+        "id": "647e8204.9689bc",
+        "type": "function",
+        "z": "8a279623.06d168",
+        "name": "command response",
+        "func": "if (msg.topic == \"command\") {\n   var response = {\n       \"topic\": \"response\",\n       \"requestId\": msg.payload.requestId,\n       \"methodName\": msg.payload.methodName,\n       \"status\": 200,\n       \"payload\": msg.payload.payload\n   };\n   return response;\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 630,
+        "y": 360,
+        "wires": [
+            [
+                "3c650c72.46f314"
+            ]
+        ]
+    },
+    {
+        "id": "4a40a39e.6d2acc",
+        "type": "modbustcp-read",
+        "z": "8a279623.06d168",
+        "name": "Wise4012ESwitches",
+        "topic": "",
+        "dataType": "Coil",
+        "adr": "0",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "server": "4742ed58.7f0694",
+        "ieeeType": "off",
+        "ieeeBE": true,
+        "x": 160,
+        "y": 120,
+        "wires": [
+            [
+                "8764f585.5784f8"
+            ]
+        ]
+    },
+    {
+        "id": "820d934f.996a8",
+        "type": "debug",
+        "z": "8a279623.06d168",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 630,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "4742ed58.7f0694",
+        "type": "modbustcp-server",
+        "z": "",
+        "name": "Wise4012E",
+        "host": "192.168.43.122",
+        "port": "502",
+        "unit_id": "1",
+        "reconnecttimeout": "10"
+    }
+]
